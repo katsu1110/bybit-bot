@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression, Ridge
 from config import get_config
 from logic_funcs import feature_engineering, get_model, logic
 from data_get_funcs import get_btc_ohlcv, get_depth, get_data
-from bybit_funcs import get_position, market_order
+from bybit_funcs import get_position, market_order, limit_order
 from utils import discord_Notify
 
 config = get_config()
@@ -22,11 +22,27 @@ apis = [
 bybit = pybybit.API(*apis, testnet=config['testnet'])
 discord_Notify(f"start!!! {datetime.datetime.now()}")
 
-next_time = 0
+
+# time.sleep(5)
+# flg = 0
+# while True:
+#     print("check!!!")
+#     try:
+#         pos = get_position(bybit, config['margin_rate'])
+#         print("success!!!")
+#         flg = 1
+#     except:
+#         print("fail!!!")
+#         time.sleep(5)
+#     if flg == 1:
+#         break
+
+# next_time = 0
+next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
 while True:
     now_time = int(datetime.datetime.now().timestamp())
     if now_time > next_time:
-        next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400
+        next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
 #         next_time = int(datetime.datetime.now().timestamp()) // 8 * 8 + 8
         message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
         discord_Notify(message)

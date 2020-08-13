@@ -69,10 +69,26 @@ def get_depth():
     dep = pd.concat(deps, axis = 1)
     return dep
 
+from bitmex import bitmex
+def get_eth():
+    config = get_config()
+    bitmex_client = bitmex(test=False, api_key=config["bitmex_key"], api_secret=config["bitmex_secret"])
+    symbol = "ETH"
+    t = datetime.datetime.strptime("2018-8", "%Y-%M") ## これより過去は取れない
+    df_eth = pd.DataFrame(bitmex_client.Trade.Trade_getBucketed(symbol=symbol, binSize="1d", count=1000, reverse=False, startTime = t).result()[0])
+    df_eth = df_eth[["timestamp", "open", "high", "low", "close", "trades", "volume", "vwap"]]
+    df_eth = df_eth.add_suffix("_eth")
+    df_eth["time"] = df_eth["timestamp_eth"].apply(lambda a : datetime.datetime.strptime(str(a).split("+")[0], "%Y-%m-%d  %H:%M:%S"))
+    return df_eth
+
 def get_data():
     data = get_btc_ohlcv()
     dep = get_depth()
     df = data.merge(dep)
-    df = df[["time", "close", "open", "high", "low", "volume",
-    "asks5", "bids5", "asks10", "bids10", "asks20", "bids20", "asks30", "bids30", "asks50", "bids50", "asks90", "bids90"]]
+    eth = get_eth()
+    df = df.merge(eth, on = "time")
+    feats = ["time", "close", "open", "high", "low", "volume",
+    "asks5", "bids5", "asks10", "bids10", "asks20", "bids20", "asks30", "bids30", "asks50", "bids50", "asks90", "bids90"]
+    feats += ["open_eth", "high_eth", "low_eth", "close_eth", "trades_eth", "volume_eth", "vwap_eth"]
+    df = df[feats]
     return df

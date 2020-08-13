@@ -15,6 +15,7 @@ def get_position(bybit, margin_rate):
         try:
             pos = bybit.rest.inverse.private_position_list(symbol='BTCUSD')
             pos = pos.json()['result']
+            pos['side']
             break
         except Exception as e:
             message = 'Get pos failed.:' + str(e)
