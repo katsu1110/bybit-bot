@@ -12,6 +12,7 @@ from utils import discord_Notify
 
 
 def get_btc_ohlcv():
+    print("get btc ohlcv...")
     dfs = []
     for k in range(4):
         t = int((datetime.datetime.now() - datetime.timedelta(days = k * 365)).timestamp()) // 86400 * 86400
@@ -51,6 +52,7 @@ def get_btc_ohlcv():
     return data
 
 def get_depth():
+    print("get depth...")
     deps = []
     for i, bp in enumerate([5, 10, 20, 30, 50, 90]):
         dep_url = f'http://data.bitcoinity.org/export_data.csv?bp={bp}&bu=c&currency=USD&data_type=bidask_sum&exchange=bitmex&timespan=all'
@@ -71,6 +73,7 @@ def get_depth():
 
 from bitmex import bitmex
 def get_eth():
+    print("get eth...")
     config = get_config()
     bitmex_client = bitmex(test=False, api_key=config["bitmex_key"], api_secret=config["bitmex_secret"])
     symbol = "ETH"

@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression, Ridge
 from config import get_config
 from logic_funcs import feature_engineering, get_model, logic
 from data_get_funcs import get_btc_ohlcv, get_depth, get_data
-from bybit_funcs import get_position, market_order, limit_order
+from bybit_funcs import get_position, market_order, limit_order, limit_multi_order
 from utils import discord_Notify
 
 config = get_config()
@@ -37,7 +37,7 @@ discord_Notify(f"start!!! {datetime.datetime.now()}")
 #     if flg == 1:
 #         break
 
-# next_time = 0
+next_time = 0
 next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
 while True:
     now_time = int(datetime.datetime.now().timestamp())
@@ -46,21 +46,23 @@ while True:
 #         next_time = int(datetime.datetime.now().timestamp()) // 8 * 8 + 8
         message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
         discord_Notify(message)
-        pos = get_position(bybit, config['margin_rate'])
+        side, size = get_position(bybit)
         pred = logic()
         if pred > 0:
             ## Buy
-            if pos[0] != 'Buy':
-                message = limit_order(bybit, 'Buy', pos[2])
+            if side != 'Buy':
+#                 message = limit_order(bybit, 'Buy', pos[2])
+                message = limit_multi_order(bybit, 'Buy', size, config["qty"])
             else:
-                message = 'No change. Side:' + str(pos[0]) + ' lot:' + str(pos[1])
+                message = 'No change. Side:' + str(side) + ' lot:' + str(size)
                 discord_Notify(message)
         else:
             ## Sell
-            if pos[0] != 'Sell':
-                message = limit_order(bybit, 'Sell', pos[2])
+            if side != 'Sell':
+#                 message = limit_order(bybit, 'Sell', pos[2])
+                message = limit_multi_order(bybit, 'Sell', size, config["qty"])
             else:
-                message = 'No change. Side:' + str(pos[0]) + ' lot:' + str(pos[1])
+                message = 'No change. Side:' + str(side) + ' lot:' + str(size)
                 discord_Notify(message)
         print(message)
     else:

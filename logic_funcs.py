@@ -89,12 +89,20 @@ def logic():
     df, feats = feature_engineering(df)
 #     model = get_model(df, feats)
 #     p = model.predict(df[feats].values[-1].reshape(1, -1))
-    df["p"] = (df["features_bid-ask20_vs_roll14"] == True) * 1 + (df["feature_c-o_shift_1"] == True) +\
-        (df["feature_c-o_eth_shift_1"] == False) / 3
+
+    
+
+    df["p1"] = (df["features_bid-ask20_vs_roll14"] == True) * 1
+    df["p2"] = (df["feature_c-o_shift_1"] == True) * 1
+    df["p3"] = (df["feature_c-o_eth_shift_1"] == False) * 1
+    df["p"]  = (df["p1"] + df["p2"] + df["p3"]) / 3
     
     p = df["p"].values[-1]
+    p1 = df["p1"].values[-1]
+    p2 = df["p2"].values[-1]
+    p3 = df["p3"].values[-1]
     #p = np.random.randn()
-    message = f"prediction rule : {p}"
+    message = f"prediction rule : {p}, rule1 : {p1}, rule2 : {p2}, rule3 : {p3}"
     print(message)
     discord_Notify(message)
     
