@@ -39,6 +39,8 @@ discord_Notify(f"start!!! {datetime.datetime.now()}")
 
 next_time = 0
 next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
+message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
+discord_Notify(message)
 while True:
     now_time = int(datetime.datetime.now().timestamp())
     if now_time > next_time:

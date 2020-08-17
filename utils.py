@@ -21,3 +21,16 @@ def discord_Notify(message, fileName=None):
             requests.post(url, data=payload, files=files)
         except:
             pass
+    
+    slack_send(message)
+    slack_send(config["slack_daily_message"])
+
+def slack_send(message):
+    config = get_config()
+    param = {
+            'token': config["slack_token"],
+            'channel': config["slack_channel"],
+            'text': message,
+            "user_name" : "bot"
+        }
+    requests.post("https://slack.com/api/chat.postMessage", data=param)
