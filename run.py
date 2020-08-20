@@ -5,7 +5,9 @@ import requests
 import pybybit
 import numpy as np
 import pandas as pd
+
 from sklearn.linear_model import LinearRegression, Ridge
+import importlib
 
 from config import get_config
 from logic_funcs import feature_engineering, get_model, logic
@@ -42,6 +44,8 @@ next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 
 message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
 discord_Notify(message)
 while True:
+#    importlib.reload(config)
+    config = get_config()
     now_time = int(datetime.datetime.now().timestamp())
     if now_time > next_time:
         next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
