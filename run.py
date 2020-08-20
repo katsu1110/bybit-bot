@@ -39,8 +39,9 @@ discord_Notify(f"start!!! {datetime.datetime.now()}")
 #     if flg == 1:
 #         break
 
-next_time = 0
+#next_time = np.inf
 next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
+next_time = int(datetime.datetime.now().timestamp()) + 10
 message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
 discord_Notify(message)
 while True:
@@ -48,6 +49,7 @@ while True:
     config = get_config()
     now_time = int(datetime.datetime.now().timestamp())
     if now_time > next_time:
+        print("bidding!!!")
         next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
 #         next_time = int(datetime.datetime.now().timestamp()) // 8 * 8 + 8
         message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
