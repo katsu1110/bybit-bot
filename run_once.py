@@ -44,16 +44,19 @@ next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 
 #next_time = int(datetime.datetime.now().timestamp()) + 10
 message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
 discord_Notify(message)
-while True:
+
+
+if True:
 #    importlib.reload(config)
     config = get_config()
     now_time = int(datetime.datetime.now().timestamp())
-    if now_time > next_time:
+#    if now_time > next_time:
+    if True:
         print("bidding!!!")
-        next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
+#        next_time = int(datetime.datetime.now().timestamp()) // 86400 * 86400 + 86400 + 300
 #         next_time = int(datetime.datetime.now().timestamp()) // 8 * 8 + 8
-        message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
-        discord_Notify(message)
+#        message = f"Next Time is : {datetime.datetime.fromtimestamp(next_time)}"
+#        discord_Notify(message)
         side, size = get_position(bybit)
         pred = logic()
         if pred > 0:
@@ -72,7 +75,7 @@ while True:
             else:
                 message = 'No change. Side:' + str(side) + ' lot:' + str(size)
                 discord_Notify(message)
-        print(message)
-    else:
-        time.sleep(10)
+#        print(message)
+#    else:
+#        time.sleep(10)
 

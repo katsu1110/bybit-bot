@@ -109,7 +109,7 @@ def limit_multi_order(bybit, side, now_size, order_lot):
         message = side + ' order failed. msg:' + res['ret_msg']
         discord_Notify(message)
     else:
-        message = side + ' order completed. order_lot:' + str(order_lot)
+        message = side + ' order completed. order_lot:' + str(order_lot) + " price: " + str(price)
         discord_Notify(message)
     return message
 

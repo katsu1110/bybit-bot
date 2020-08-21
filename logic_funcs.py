@@ -11,6 +11,7 @@ from sklearn.linear_model import LinearRegression, Ridge
 from data_get_funcs import get_data
 from utils import discord_Notify
 
+
 def feature_engineering(df):
 #     df = pd.read_pickle("data.pkl")
     df["target"] = df["close"].diff().shift(-1)
@@ -147,9 +148,9 @@ def feature_engineering(df):
     df["feature_rule1"] = df["feature_rule1"] / 3
     
     df["feature_rule2"] = (df["features_bid-ask20_vs_roll14"] == True) * 1 + (df["feature_c-o_shift_1"] == True) * 1 +\
-    (df["feature_c-o_eth_shift_1"] == False) * 1 + (df["feature_l-o_shift_1_diff_1"] == True) * 1 +\
+    (df["feature_c-o_eth_shift_1"] == False) * 1 +\
     (df["features_bid-ask90_vs_roll60"] == True) * 1
-    df["feature_rule2"] = df["feature_rule2"] / 5
+    df["feature_rule2"] = df["feature_rule2"] / 4
     
     df["feature_rule3"] = (df["features_bid-ask20_vs_roll14"] == True) * 1 + (df["feature_c-o_shift_1"] == True) * 1 +\
     (df["feature_c-o_eth_shift_1"] == False) * 1 + (df["feature_l-o_shift_1_diff_1"] == True) * 1 +\
@@ -157,20 +158,18 @@ def feature_engineering(df):
     (df["feature_h-c-o-l_eth_roll28_vs_roll60"] == True) * 1
     df["feature_rule3"] = df["feature_rule3"] / 7
     
-    df["feature_rule4"] = (df["feature_l-c_vs_roll7"] == True) * 1 +\
-    (df["features_bid-ask5_diff_1"] == True) * 1 +\
+    df["feature_rule4"] =(df["features_bid-ask5_diff_1"] == True) * 1 +\
     (df["features_bid-ask20_roll14_vs_roll28"] == True) * 1 +\
     (df["feature_c-o_vs_roll14"] == False) * 1 +\
     (df["feature_c-o"] == False) * 1 +\
     (df["feature_dow"] == False) * 1
-    df["feature_rule4"] = df["feature_rule4"] / 6
+    df["feature_rule4"] = df["feature_rule4"] / 5
     
-    df["feature_rule5"] = (df["feature_rule4"] + df["feature_rule2"])/2
+    df["feature_rule5"] = (df["feature_rule4"] * 5 + df["feature_rule2"] * 4)/9
+
+    df["prediction_rule"] = df["feature_rule5"]
     
     return df, feats
-
-
-
 
 
 
@@ -190,7 +189,7 @@ def logic():
     
 
 def pred_logic(df, feats, send = True):
-    p = df["feature_rule5"].values[-1]
+    p = df["prediction_rule"].values[-1]
     #p = np.random.randn()
     if send:
         message = f"prediction : {p}"
@@ -207,6 +206,8 @@ def test_logic():
 
     t = "2020-01-01"
     k_start = np.where(df["time"] == datetime.datetime.strptime(t, '%Y-%m-%d'))[0][0]
+    print("corr : ", np.corrcoef(df[k_start:-1]["prediction_rule"], df[k_start:-1]["target"]))
+    print(df[k_start:].groupby(["prediction_rule"])["target"].agg(["mean", "median", "count"]))
 
     r = 0
     rs = []
@@ -235,6 +236,8 @@ def test_logic():
     print(f"long  win : {long_win}/{long_count}  = {long_win/long_count}")
     print(f"short win : {short_win}/{short_count}  = {short_win/short_count}")
     print(f"max down : {max_down}")
+
+    print("last pred : ", df["prediction_rule"].values[-1])
     # import matplotlib.pyplot as plt
     # plt.plot(rs)
     # plt.show()
