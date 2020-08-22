@@ -11,21 +11,35 @@ from sklearn.linear_model import LinearRegression, Ridge
 from utils import discord_Notify
 from config import get_config
 
-def get_position(bybit):
+def get_position(bybit, margin_rate):
     while True:
         try:
             pos = bybit.rest.inverse.private_position_list(symbol='BTCUSD')
             pos = pos.json()['result']
-            pos['side']
             break
         except Exception as e:
             message = 'Get pos failed.:' + str(e)
             discord_Notify(message)
             time.sleep(2)
             continue
+    while True:
+        try:
+            tic = bybit.rest.inverse.public_tickers(symbol='BTCUSD')
+            tic = tic.json()['result'][0]
+            break
+        except Exception as e:
+            message = 'Get tic failed.:' + str(e)
+            discord_Notify(message)
+            time.sleep(2)
+            continue
     side = str(pos['side'])
     size = int(pos['size'])
-    return side, size
+    price = float(tic['mark_price'])
+    wallet_balance = float(pos['wallet_balance'])
+    leverage = int(pos['leverage'])
+    order_lot = int(price * wallet_balance * leverage * margin_rate + size)
+    return side, size, order_lot
+
 
 def market_order(bybit, side, order_lot):
     while True:
@@ -33,7 +47,8 @@ def market_order(bybit, side, order_lot):
             res = bybit.rest.inverse.private_order_create(side=side, symbol='BTCUSD', order_type='Market', qty=order_lot, time_in_force='GoodTillCancel')
             res = res.json()
             break
-        except Exception:
+        except Exception as e:
+            print(e)
             message = side + ' order failed.'
             discord_Notify(message)
             time.sleep(5)
@@ -47,18 +62,23 @@ def market_order(bybit, side, order_lot):
     return message
 
 
-def limit_order(bybit, side, order_lot):
+def limit_order(bybit, side, order_lot, delta = 5):
     while True:
         try:
-            bybit.rest.inverse.private_order_cancelall("BTCUSD")
+            if side == "Sell":
+                coef = 1
+            if side == "Buy":
+                coef = -1
+#            bybit.rest.inverse.private_order_cancelall("BTCUSD")
             tic = bybit.rest.inverse.public_tickers("BTCUSD")
             tic = tic.json()['result']
             price = tic[0]["last_price"]
-            res = bybit.rest.inverse.private_order_create(side=side, symbol='BTCUSD', price = price,
-                                                          order_type='Limit', qty=order_lot, time_in_force='GoodTillCancel')
+            res = bybit.rest.inverse.private_order_create(side=side, symbol='BTCUSD', price = str(price + delta * coef),
+                                                          order_type='Limit', qty=str(order_lot), time_in_force='GoodTillCancel')
             res = res.json()
             break
-        except Exception:
+        except Exception as e:
+            print(e)
             message = side + ' order failed.'
             discord_Notify(message)
             time.sleep(5)
@@ -67,7 +87,7 @@ def limit_order(bybit, side, order_lot):
         message = side + ' order failed. msg:' + res['ret_msg']
         discord_Notify(message)
     else:
-        message = side + ' order completed. order_lot:' + str(order_lot)
+        message = side + ' order completed. order_lot:' + str(order_lot) + " price: " + str(price)
         discord_Notify(message)
     return message
 
@@ -76,7 +96,7 @@ def limit_order(bybit, side, order_lot):
 def limit_multi_order(bybit, side, now_size, order_lot):
     while True:
         try:
-            bybit.rest.inverse.private_order_cancelall("BTCUSD")
+#            bybit.rest.inverse.private_order_cancelall("BTCUSD")
             
 #             deltas = [5] + [delta * 2 ** (k) for k in range(num)]
             deltas = [5, 100, 250]
