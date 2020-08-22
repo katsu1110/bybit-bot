@@ -72,7 +72,7 @@ def limit_order(bybit, side, order_lot, delta = 5):
 #            bybit.rest.inverse.private_order_cancelall("BTCUSD")
             tic = bybit.rest.inverse.public_tickers("BTCUSD")
             tic = tic.json()['result']
-            price = tic[0]["last_price"]
+            price = float(tic[0]["last_price"])
             res = bybit.rest.inverse.private_order_create(side=side, symbol='BTCUSD', price = str(price + delta * coef),
                                                           order_type='Limit', qty=str(order_lot), time_in_force='GoodTillCancel')
             res = res.json()
