@@ -9,7 +9,34 @@ from config import get_config
 from sklearn.linear_model import LinearRegression, Ridge
 
 from utils import discord_Notify
+from pred_funcs import pred_logic
 from config import get_config
+
+
+def limit_order_perf(bybit, pred, margin_rate):
+    delta = 0.5
+    while True:
+        time.sleep(60)
+        side, size, order_lot = get_position(bybit, margin_rate)
+        bybit.rest.inverse.private_order_cancelall("BTCUSD") ## cancel
+        if pred > 0:
+            ## Buy
+            if side != 'Buy':
+                message = limit_order(bybit, 'Buy', order_lot, delta = delta)
+            else:
+                message = 'No change. Side:' + str(side) + ' lot:' + str(size)
+                discord_Notify(message)
+                break
+        else:
+            ## Sell
+            if side != 'Sell':
+                message = limit_order(bybit, 'Sell', order_lot, delta = delta)
+            else:
+                message = 'No change. Side:' + str(side) + ' lot:' + str(size)
+                discord_Notify(message)
+                break
+        discord_Notify(message)
+    
 
 def get_position(bybit, margin_rate):
     while True:
@@ -74,7 +101,7 @@ def limit_order(bybit, side, order_lot, delta = 5):
             tic = tic.json()['result']
             price = float(tic[0]["last_price"])
             res = bybit.rest.inverse.private_order_create(side=side, symbol='BTCUSD', price = str(price + delta * coef),
-                                                          order_type='Limit', qty=str(order_lot), time_in_force='GoodTillCancel')
+                                                          order_type='Limit', qty=str(order_lot), time_in_force='PostOnly')
             res = res.json()
             break
         except Exception as e:
@@ -85,10 +112,8 @@ def limit_order(bybit, side, order_lot, delta = 5):
             continue
     if res['ret_msg'] != 'OK':
         message = side + ' order failed. msg:' + res['ret_msg']
-        discord_Notify(message)
     else:
         message = side + ' order completed. order_lot:' + str(order_lot) + " price: " + str(price)
-        discord_Notify(message)
     return message
 
 
@@ -141,5 +166,11 @@ if __name__ == "__main__":
         config['secret']
     ]
     bybit = pybybit.API(*apis, testnet=config['testnet'])
-    
-    print(get_position(bybit))
+    print("position...")    
+    print(get_position(bybit, config["margin_rate"]))
+    print("limit order perf...")    
+    config["margin_rate"] = 0.001
+    print("pred...")
+    pred = 0.8#pred_logic()
+    print("order...")
+    limit_order_perf(bybit, pred, config["margin_rate"])

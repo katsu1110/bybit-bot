@@ -181,14 +181,14 @@ def get_model(df, feats):
     return model
 
 
-def logic():
+def pred_logic():
     df = get_data()
     df, feats = feature_engineering(df)
-    p = pred_logic(df, feats)
+    p = prediction(df, feats)
     return p
     
 
-def pred_logic(df, feats, send = True):
+def prediction(df, feats, send = True):
     p = df["prediction_rule"].values[-1]
     #p = np.random.randn()
     if send:
@@ -217,7 +217,7 @@ def test_logic():
     short_win = 0
     max_down = 0
     for k in range(k_start, len(df) - 1):
-        pred = pred_logic(df.iloc[:k], feats, send = False)
+        pred = prediction(df.iloc[:k], feats, send = False)
         co = (df.iloc[k]["close"] - df.iloc[k]["open"])
         if pred > 0:
             r += co
